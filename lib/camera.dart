@@ -160,11 +160,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> sendData() async {
     String resonsed;
     String base64Image;
-    if (_image != null) {
       base64Image = base64Encode(_image.readAsBytesSync());
-    } else {
-      Toast.show("No Image Selected", context);
-      Map map = {
+       Map map = {
         'image': base64Image,
       };
       var body = json.encode(map);
@@ -200,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
       } catch (e) {
         print("Error:$e");
       }
-    }
+   
   }
 
   DateTime currentBackPressTime;

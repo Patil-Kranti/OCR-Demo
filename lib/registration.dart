@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:camera/login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 import 'package:toast/toast.dart';
 
 class RegistrationPage extends StatefulWidget {
@@ -26,10 +25,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.black,
-          // pinned: true,
           elevation: 10.0,
-          // forceElevated: true,
-          // expandedHeight: 150.0,
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: false,
             background: Container(
@@ -90,7 +86,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 child: TextFormField(
                   validator: _validateFirstName,
                   style: new TextStyle(color: Colors.black87),
-                  // controller: emailController,
                   decoration: InputDecoration(
                       hasFloatingPlaceholder: true,
                       focusedBorder: OutlineInputBorder(
@@ -99,7 +94,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.black87),
                           borderRadius: BorderRadius.all(Radius.circular(10))),
-                      // hintText: 'Enter your product title',
                       labelStyle: TextStyle(color: Colors.black87),
                       labelText: 'First Name'),
                   onSaved: (String val) {
@@ -123,7 +117,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.black87),
                           borderRadius: BorderRadius.all(Radius.circular(10))),
-                      // hintText: 'Enter your product title',
                       labelStyle: TextStyle(color: Colors.black87),
                       labelText: 'Last Name'),
                   onSaved: (String val) {
@@ -139,7 +132,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: TextFormField(
             validator: _validateEmail,
             style: new TextStyle(color: Colors.black87),
-            // controller: emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
                 hasFloatingPlaceholder: true,
@@ -149,7 +141,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.black87),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
-                // hintText: 'Enter your product title',
                 labelStyle: TextStyle(color: Colors.black87),
                 labelText: 'Email Address'),
             onSaved: (String val) {
@@ -165,8 +156,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: TextFormField(
             validator: _validatePasswd,
             style: new TextStyle(color: Colors.black87),
-            // controller: emailController,
-            keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
                 hasFloatingPlaceholder: true,
                 focusedBorder: OutlineInputBorder(
@@ -175,7 +164,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.black87),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
-                // hintText: 'Enter your product title',
                 labelStyle: TextStyle(color: Colors.black87),
                 labelText: 'Password'),
             onSaved: (String val) {
@@ -189,10 +177,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
         Container(
           padding: EdgeInsets.only(top: 5, bottom: 5),
           child: TextFormField(
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(10),
+            ],
             validator: _validatePhoneNumber,
             style: new TextStyle(color: Colors.black87),
-            // controller: emailController,
-            keyboardType: TextInputType.emailAddress,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
                 hasFloatingPlaceholder: true,
                 focusedBorder: OutlineInputBorder(
@@ -201,7 +191,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.black87),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
-                // hintText: 'Enter your product title',
                 labelStyle: TextStyle(color: Colors.black87),
                 labelText: 'Phone Number'),
             onSaved: (String val) {
@@ -217,7 +206,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: TextFormField(
             validator: _validateAddress,
             style: new TextStyle(color: Colors.black87),
-            // controller: emailController,
             decoration: InputDecoration(
                 hasFloatingPlaceholder: true,
                 focusedBorder: OutlineInputBorder(
@@ -226,7 +214,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.black87),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
-                // hintText: 'Enter your product title',
                 labelStyle: TextStyle(color: Colors.black87),
                 labelText: 'Address'),
             onSaved: (String val) {
@@ -242,7 +229,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: TextFormField(
             validator: _validateCompanyName,
             style: new TextStyle(color: Colors.black87),
-// controller: emailController,
             decoration: InputDecoration(
                 hasFloatingPlaceholder: true,
                 focusedBorder: OutlineInputBorder(
@@ -278,7 +264,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
               borderRadius: BorderRadius.all(Radius.circular(10.0)),
               side: BorderSide(color: Colors.black87)),
           padding: EdgeInsets.only(left: 50, right: 50),
-// color: Theme.of(context).buttonColor,
           textColor: Colors.black87,
           child: Text('Sign Up'),
           onPressed: () {
@@ -308,8 +293,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
       return "Password is Required";
-// } else if (!regExp.hasMatch(value)) {
-//   return "Invalid Password";
+    } else if (!regExp.hasMatch(value)) {
+      return "Invalid Password";
     } else {
       return null;
     }
@@ -330,7 +315,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   _sendToServer() {
     if (_key.currentState.validate()) {
-// No any error in validation
       _key.currentState.save();
       if (_acceptTerms) {
         _datareciver(
@@ -363,63 +347,61 @@ class _RegistrationPageState extends State<RegistrationPage> {
     String address,
     String companyName,
   ) async {
-    var data;
-    var uri = Uri.parse(
-        "http://hardcastle.co.in/PHP_WEB/prabhiyw_glitedge_beta/api/user_manager.php");
-    var request = new http.MultipartRequest("POST", uri);
+    FirebaseUser user;
+    try {
+      user = (await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: email.trim(), password: passwd.trim()))
+          .user;
+      print(user.uid);
+      final databasereference = FirebaseDatabase.instance.reference();
+      databasereference.child(user.uid).set({
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'phoneNumber': phoneNumber,
+        'address': address,
+        'companyName': companyName,
+      });
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              elevation: 40,
+              backgroundColor: Colors.teal[200],
+              title: Text("Sucess"),
+              content: Text("User Registered Sucessfully"),
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.check),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => AuthPage()));
+                    })
+              ],
+            );
+          });
+    } catch (e) {
+      print('Error:$e');
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Colors.red[100],
+              title: Text("Error In Registration"),
+              content: Text(e),
+              actions: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.check),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    })
+              ],
+            );
+          });
+    }
 
-    request.fields['name'] = firstName;
-    request.fields['lastname'] = lastName;
-    request.fields['email'] = email;
-    request.fields['pwd'] = pwd;
-    request.fields['phone'] = phoneNumber;
-    request.fields['address'] = address;
-    request.fields['company'] = companyName;
-    request.fields['type'] = "INSERT";
-    var response = await request.send().timeout(const Duration(minutes: 2));
-    if (response.statusCode == 200) print('Uploaded!');
-    response.stream.transform(utf8.decoder).listen((value) async {
-      data = jsonDecode(value);
-      print(data);
-      if (data["DATA"] == "SUCCESS") {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                elevation: 40,
-                backgroundColor: Colors.teal[200],
-                title: Text("Successfully"),
-                content: Text("Reg"),
-                actions: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.check),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => AuthPage()));
-                      })
-                ],
-              );
-            });
-      } else {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                backgroundColor: Colors.red[100],
-                title: Text("Error In Registration"),
-                content: Text(
-                    "Please Check the Internet Connection or Please Verify the filled information"),
-                actions: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.check),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      })
-                ],
-              );
-            });
-      }
-    });
+    if (user != null) {
+    } else {}
   }
 
   DateTime currentBackPressTime;
@@ -440,8 +422,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _validateFirstName(String value) {
     if (value.length == 0) {
       return "First Name is Required";
-// } else if (!regExp.hasMatch(value)) {
-//   return "Invalid Password";
     } else {
       return null;
     }
@@ -450,8 +430,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _validateLastName(String value) {
     if (value.length == 0) {
       return "Last Name is Required";
-// } else if (!regExp.hasMatch(value)) {
-//   return "Invalid Password";
     } else {
       return null;
     }
@@ -460,8 +438,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _validateAddress(String value) {
     if (value.length == 0) {
       return "Address is Required";
-// } else if (!regExp.hasMatch(value)) {
-//   return "Invalid Password";
     } else {
       return null;
     }
@@ -470,8 +446,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String _validateCompanyName(String value) {
     if (value.length == 0) {
       return "Company Name is Required";
-// } else if (!regExp.hasMatch(value)) {
-//   return "Invalid Password";
     } else {
       return null;
     }
